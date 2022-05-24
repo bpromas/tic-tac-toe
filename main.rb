@@ -1,11 +1,11 @@
 class Board
-    def initialize(xsize = 3, ysize = 3)
-        if xsize != ysize then 
-            puts "You cannot win diagonally in a rectangular board!" 
+    def initialize(rows = 3, cols = 3)
+        if rows != cols then 
+            puts "Warning: You cannot win diagonally in a rectangular board!" 
         end
-        @xsize = xsize
-        @ysize = ysize
-        @state = Array.new(@xsize) { Array.new(@ysize, '_') }
+        @rows = rows
+        @cols = cols
+        @state = Array.new(@rows) { Array.new(@cols, '_') }
     end
 
     def state
@@ -14,7 +14,7 @@ class Board
         #1 _ | _ | _
         #2 _ | _ | _
         col_guide = ""
-        @ysize.times do |col|
+        @cols.times do |col|
             col_guide += "  #{col} " 
         end
         p col_guide
@@ -26,5 +26,64 @@ class Board
 
     def mark(symbol, row, col)
         @state[row][col] = symbol
+    end
+
+    def victory_check
+        #check horizontal wins
+        @state.each do |row| 
+            if row.all? {|symbol| symbol == "O"} then
+                puts "O wins!"
+                return 1
+            elsif row.all? {|symbol| symbol == "X"} then
+                puts "X wins!"
+                return 2
+            end
+        end
+
+        #create a rotated board
+        rotated_state = @state.transpose.map(&:reverse)
+
+        #check vertical wins
+        rotated_state.each do |row| 
+            if row.all? {|symbol| symbol == "O"} then
+                puts "O wins!"
+                return 1
+            elsif row.all? {|symbol| symbol == "X"} then
+                puts "X wins!"
+                return 2
+            end
+        end
+
+        #check diagonal wins
+        if @rows == @cols
+            diag1 = Array.new(@rows)
+            step = 0
+            while step < @rows
+                diag1[step] = @state[step][step]
+                step += 1
+            end            
+            if diag1.all? {|symbol| symbol == "O"} then
+                puts "O wins!"
+                return 1
+            elsif diag1.all? {|symbol| symbol == "X"} then
+                puts "X wins!"
+                return 2
+            end
+
+            diag2 = Array.new(@rows)
+            step = 0
+            while step < @rows
+                diag2[step] = rotated_state[step][step]
+                step += 1
+            end  
+            if diag2.all? {|symbol| symbol == "O"} then
+                puts "O wins!"
+                return 1
+            elsif diag2.all? {|symbol| symbol == "X"} then
+                puts "X wins!"
+                return 2
+            end
+
+        end
     end
 end
