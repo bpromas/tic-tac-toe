@@ -1,4 +1,6 @@
 class Board
+    attr_reader :turn
+
     def initialize(rows = 3, cols = 3)
         if rows != cols then 
             puts "Warning: You cannot win diagonally in a rectangular board!" 
@@ -6,9 +8,12 @@ class Board
         @rows = rows
         @cols = cols
         @state = Array.new(@rows) { Array.new(@cols, '_') }
+        @turn = 1
     end
 
-    def state
+    public
+
+    def print_state
         #  0   1   2 
         #0 _ | _ | _
         #1 _ | _ | _
@@ -24,18 +29,23 @@ class Board
         end
     end
 
-    def mark(symbol, row, col)
-        @state[row][col] = symbol
+    def mark(row, col)
+        if @state[row][col] == "_" then
+            @state[row][col] = @turn == 1 ? "O" : "X"
+            toggle_turn
+        else
+            puts "Invalid placement!"
+        end
     end
 
     def victory_check
         #check horizontal wins
         @state.each do |row| 
             if row.all? {|symbol| symbol == "O"} then
-                puts "O wins!"
+                puts "Player 1 wins!"
                 return 1
             elsif row.all? {|symbol| symbol == "X"} then
-                puts "X wins!"
+                puts "Player 2 wins!"
                 return 2
             end
         end
@@ -46,10 +56,10 @@ class Board
         #check vertical wins
         rotated_state.each do |row| 
             if row.all? {|symbol| symbol == "O"} then
-                puts "O wins!"
+                puts "Player 1 wins!"
                 return 1
             elsif row.all? {|symbol| symbol == "X"} then
-                puts "X wins!"
+                puts "Player 2 wins!"
                 return 2
             end
         end
@@ -63,10 +73,10 @@ class Board
                 step += 1
             end            
             if diag1.all? {|symbol| symbol == "O"} then
-                puts "O wins!"
+                puts "Player 1 wins!"
                 return 1
             elsif diag1.all? {|symbol| symbol == "X"} then
-                puts "X wins!"
+                puts "Player 2 wins!"
                 return 2
             end
 
@@ -77,13 +87,39 @@ class Board
                 step += 1
             end  
             if diag2.all? {|symbol| symbol == "O"} then
-                puts "O wins!"
+                puts "Player 1 wins!"
                 return 1
             elsif diag2.all? {|symbol| symbol == "X"} then
-                puts "X wins!"
+                puts "Player 2 wins!"
                 return 2
             end
+        end
 
+        if @state.flatten.none? { |elem| elem == "_" } then
+            puts "It's a draw!"
+            return 0
         end
     end
+
+    private
+
+    def toggle_turn
+        @turn = @turn == 1 ? 2 : 1
+    end
 end
+
+puts "How many rows will the board have?"
+rows = gets.chomp().to_i
+puts "How many columns will the board have?"
+cols = gets.chomp().to_i
+board = Board.new(rows, cols)
+
+while board.victory_check == nil do
+    board.print_state
+    puts "Player #{board.turn} what row do you want to place in?"
+    row = gets.chomp().to_i
+    puts "Player #{board.turn} what column do you want to place in?"
+    col = gets.chomp().to_i
+    board.mark(row, col)
+end
+board.print_state
